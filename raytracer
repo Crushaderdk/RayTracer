@@ -1,0 +1,82 @@
+
+//Vektoren fra kameraet til scenen defineres
+//Radius defineres
+PVector origin, sphereA, light;
+float radius = 150;
+int cVar = 255; 
+int i = 0;
+void setup(){
+//Vi definerer windowsize
+
+// Vi definerer oprindelsespunktet for kameraet, lyset og scenen.
+size(640,480);
+origin = new PVector(width/2, height/2,-1000);
+sphereA = new PVector(250,100,700);
+light = new PVector(0, 0,0);
+}
+//Baggrundsfarven defineres
+//Vi definerer kuglen.
+void draw(){
+background(120);
+i++;
+drawSphere(origin, sphereA, radius);
+drawShadow(origin, new PVector(250,100,i), light, radius);
+drawShadow(origin, new PVector(50,300,i), light, radius);
+
+}
+//Vi tegner kuglen ved hjælp af parametrene vi definerede tidligere og et par forloops.
+//Vi definerer vores cameraRay og screenPoint og normaliserer.
+//Vi krydser vores vektorere og bestemmer farven.
+
+void drawSphere(PVector _origin, PVector _Sphere, float _radius ){
+  for(int i = 0; i < width;i++){
+    for(int j = 0; j < height;j++){
+    PVector screenPoint = new PVector(i,j,0);
+    PVector cameraRay = PVector.sub(screenPoint, _origin);
+    cameraRay = cameraRay.normalize();
+    PVector oc = PVector.sub(_origin, _Sphere);
+    float intr = sq(cameraRay.dot(oc))-oc.dot(oc)+sq(radius);
+    if(intr >=0){
+    set(i,j,color(cVar,0,0));
+    
+    }
+    }
+  }
+
+}
+//Ved hjælp af forloops tegner vi en skygge på kuglen.
+//Vi bruger også if statements,krydsprodukter og vi trækker vektorer fra hinanden så vi kan afstandsbedømme.
+
+
+void drawShadow(PVector _origin, PVector _Sphere, PVector _light, float _radius){
+  for(int i = 0; i < width;i++){
+    for(int j = 0; j < height;j++){
+    PVector screenPoint = new PVector(i,j,0);
+    PVector cameraRay = PVector.sub(screenPoint, _origin);
+    cameraRay = cameraRay.normalize();
+    PVector oc = PVector.sub(_origin, _Sphere);
+    float intr = sq(cameraRay.dot(oc))-oc.dot(oc)+sq(radius);
+    if(intr >=0){
+    float d1 = -(cameraRay.dot(oc))+sqrt(intr);
+    float d2 = -(cameraRay.dot(oc))-sqrt(intr);
+    PVector newOrigin;
+      if(d1<d2)
+      newOrigin = new PVector(i,j,d1);
+      else
+      newOrigin = new PVector(i,j,d2);
+    PVector shadowRay = PVector.sub(newOrigin, _light);
+    shadowRay.normalize();
+    PVector shadowOc = PVector.sub(_light, _Sphere);
+    float shadowIntr = sq(shadowRay.dot(shadowOc))-shadowOc.dot(shadowOc)+sq(_radius); 
+    if(shadowIntr >= 0)
+      set(i,j,color(0));
+      else
+      set(i,j,color(cVar,0,0));
+    
+    
+    }
+    }
+  }
+
+
+}
